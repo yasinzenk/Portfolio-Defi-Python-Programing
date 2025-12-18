@@ -1,4 +1,4 @@
-# Project Structure Portfolio (VO)
+# Project Structure Portfolio (V0)
 
 ## Core Architecture
 1. Asset class
