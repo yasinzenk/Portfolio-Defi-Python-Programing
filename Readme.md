@@ -12,7 +12,7 @@ Represents a single asset or DeFi protocol position.
 - Methods
   - market_value() → returns the total value of the position
 
-1. Portfolio class
+2. Portfolio class
 Represents a portfolio composed of multiple assets.
 
 - Attributes
