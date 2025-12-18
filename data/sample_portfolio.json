@@ -1,0 +1,55 @@
+{
+    "name": "defi_portfolio",
+    "assets": [
+        {
+            "symbol": "ETH",
+            "amount": 1.5,
+            "price": 2200
+        },
+        {
+            "symbol": "BTC",
+            "amount": 0.05,
+            "price": 42000
+        },
+        {
+            "symbol": "AAVE",
+            "amount": 15,
+            "price": 95
+        },
+        {
+            "symbol": "UNI",
+            "amount": 120,
+            "price": 6.5
+        },
+        {
+            "symbol": "LINK",
+            "amount": 80,
+            "price": 14
+        },
+        {
+            "symbol": "MKR",
+            "amount": 0.4,
+            "price": 1450
+        },
+        {
+            "symbol": "COMP",
+            "amount": 10,
+            "price": 60
+        },
+        {
+            "symbol": "SNX",
+            "amount": 200,
+            "price": 3.2
+        },
+        {
+            "symbol": "CRV",
+            "amount": 300,
+            "price": 0.55
+        },
+        {
+            "symbol": "USDC",
+            "amount": 2000,
+            "price": 1.0
+        }
+    ]
+}
