@@ -37,7 +37,8 @@ class Asset:
     """
     symbol: str
     amount: float
-    price: float
+    price: float | None = None
+    coingecko_id: str | None = None
 
     def market_value(self) -> float:
         """
@@ -46,6 +47,8 @@ class Asset:
         Returns:
             The market value of the asset.
         """
+        if self.price is None:
+            raise ValueError(f"Price is missing for {self.symbol}. Fetch prices before computing market value.")
         return self.amount * self.price
 
 

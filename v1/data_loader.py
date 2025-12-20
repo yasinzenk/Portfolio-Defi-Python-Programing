@@ -71,13 +71,13 @@ def load_portfolio_from_json(path: str | Path) -> "Portfolio":
         try:
             symbol = str(item["symbol"])
             amount = float(item["amount"])
-            price = float(item["price"])
         except KeyError as e:
             raise KeyError(f"Asset #{i}: missing field {e}")
         except (TypeError, ValueError) as e:
             raise ValueError(f"Asset #{i}: invalid value - {e}")
         
-        portfolio.add_asset(Asset(symbol=symbol, amount=amount, price=price))
+        coingecko_id = item.get("coingecko_id")
+        portfolio.add_asset(Asset(symbol=symbol, amount=amount, price=None, coingecko_id=coingecko_id))
     
     return portfolio
 
@@ -113,7 +113,7 @@ def validate_portfolio_data(data: dict) -> list[str]:
             errors.append(f"Asset #{i}: must be a JSON object")
             continue
 
-        for field in ["symbol", "amount", "price"]:
+        for field in ["symbol", "amount", "coingecko_id"]:
             if field not in asset:
                 errors.append(f"Asset #{i}: missing field {field}")
 
