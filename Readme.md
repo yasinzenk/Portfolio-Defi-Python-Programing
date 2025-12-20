@@ -40,7 +40,7 @@ The CLI loads a portfolio file and prints:
 ## Input Format
 ```bash
 {
-  "name": "defi_test_portfolio",
+  "name": "defi_portfolio",
   "assets": [
     { "symbol": "ETH", "amount": 1.5, "price": 2200 },
     { "symbol": "AAVE", "amount": 15, "price": 95 },
@@ -48,10 +48,19 @@ The CLI loads a portfolio file and prints:
   ]
 }
 ```
-## How to run
+## How to run V0
 ```bash
 cd v0
 python main.py --portfolio ../data/sample_portfolio.json
+```
+
+## How to run V1
+```bash
+cd v1
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python main.py --portfolio ../data/sample_portfolio.json --days 180
 ```
 
 ## 💡 Next Improvements
