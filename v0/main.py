@@ -27,14 +27,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Chargement du portfolio
+    # Loading of the portfolio
     portfolio = load_portfolio_from_json(args.portfolio)
 
-    # Calcul des métriques
+    # Metrics computation
     total = portfolio.total_value()
     weights = portfolio.weights()
 
-    # Affichage du résumé
+    # Summary
     print(f"\n{'='*40}")
     print(f"Portfolio: {portfolio.name}")
     print(f"{'='*40}")
@@ -42,10 +42,10 @@ def main() -> None:
     print(f"Number of assets: {len(portfolio.assets)}")
     print(f"{'='*40}\n")
 
-    print("Allocation (from highest to lowest):")
+    print("Allocation:")
     print("-" * 30)
     for sym, w in sorted(weights.items(), key=lambda x: x[1], reverse=True):
-        bar = "█" * int(w * 20)  # Barre visuelle
+        bar = "█" * int(w * 100)
         print(f"  {sym:8} {w*100:6.2f}% {bar}")
     print()
 

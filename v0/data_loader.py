@@ -1,9 +1,6 @@
 """
 Portfolio data loading module.
-
-
 This module provides functions for loading portfolios from different sources (JSON for V0, API in V1).
-
 """
 
 from __future__ import annotations
