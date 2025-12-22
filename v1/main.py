@@ -13,13 +13,14 @@ import pandas as pd
 import time
 
 from data_loader import load_portfolio_from_json
-from data_fetcher import CoingeckoClient
+from data_fetcher import CryptoCompareClient
 from risk_analyzer import (
     prices_to_returns,
     annualized_volatility,
     sharpe_ratio,
     historical_var,
     correlation_matrix,
+    portfolio_volatility,
 )
 
 
@@ -60,38 +61,48 @@ def main() -> None:
     # Loading of the portfolio
     portfolio = load_portfolio_from_json(args.portfolio)
 
-    cg = CoingeckoClient()
+    api_client = CryptoCompareClient()
 
     # Fetch current prices to compute portfolio value/weights
+    print("Fetching current prices...")
     updated_assets = []
     for asset in portfolio.assets:
-        coin_id = getattr(asset, "coingecko_id", None)
-        current_price = cg.get_current_price(coin_id=coin_id)
+        crypto_id = asset.crypto_id
+        if not crypto_id:
+            raise ValueError(
+                f"Missing 'crypto_id' for asset '{asset.symbol}'. "
+                "Add it in your JSON file."
+            )
+        
+        current_price = api_client.get_current_price(symbol=crypto_id)
         updated_assets.append(
             type(asset)(
                 symbol=asset.symbol,
                 amount=asset.amount,
                 price=current_price,
-                coingecko_id=coin_id,
+                crypto_id=crypto_id,
             )
         )
+        time.sleep(0.5)  # Respectful delay between requests
 
     # Replace portfolio assets with priced versions
     portfolio.assets = updated_assets
 
-    # Fetch historical prices (Coingecko)
+    # Fetch historical prices
+    print(f"Fetching {args.days} days of historical data...")
     price_series = {}
 
     for asset in portfolio.assets:
-        coin_id = getattr(asset, "coingecko_id", None)
-        if not coin_id:
-            raise ValueError(
-                f"Missing 'coingecko_id' for asset '{asset.symbol}'. "
-                f"Add it in your JSON (e.g. ETH -> ethereum)."
-            )
+        crypto_id = asset.crypto_id
+        # Validation already done above, but let's be safe
+        if not crypto_id:
+            raise ValueError(f"Missing 'crypto_id' for asset '{asset.symbol}'.")
 
-        df = cg.get_market_chart(coin_id=coin_id, days=args.days)
-        time.sleep(1.2)
+        df = api_client.get_historical_daily(
+            symbol=crypto_id, 
+            days=args.days
+        )
+        time.sleep(0.5)  # Respectful delay
         price_series[asset.symbol] = df["price"]
 
     # Align all assets on common dates
@@ -134,6 +145,10 @@ def main() -> None:
     metrics_df = pd.DataFrame(rows).set_index("asset").round(4)
     print(metrics_df.to_string())
     print()
+
+    # Portfolio-level volatility
+    port_vol = portfolio_volatility(returns_df, weights)
+    print(f"\nPortfolio volatility (annualized): {port_vol:.2%}")
 
     # Correlation matrix
     print("Correlation matrix:")

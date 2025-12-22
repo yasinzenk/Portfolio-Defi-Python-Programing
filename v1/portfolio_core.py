@@ -32,13 +32,16 @@ class Asset:
 
     Attributes:
         symbol: Ticker of the asset (ex: "ETH", "BTC", "AAVE").
-        amount: Quantity of the asset.
-        price: Price of the asset in USD.
+        amount: Quantity of the asset held.
+        price: Current price of the asset in USD. Can be None if
+               the price will be fetched from an API.
+        crypto_id: Identifier used by the price API to fetch data.
+                   For CryptoCompare, this is the symbol (e.g., "ETH").
     """
     symbol: str
     amount: float
     price: float | None = None
-    coingecko_id: str | None = None
+    crypto_id: str | None = None
 
     def market_value(self) -> float:
         """

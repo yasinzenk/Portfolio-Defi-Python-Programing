@@ -46,7 +46,7 @@ def load_portfolio_from_json(path: str | Path) -> "Portfolio":
         raise ValueError(
             f"Invalid file format: {path.suffix}. V0 supports only .json files"
         )
-    
+
     # Lecture and parsing the JSON file
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -65,7 +65,7 @@ def load_portfolio_from_json(path: str | Path) -> "Portfolio":
 
     # Creation of the portfolio
     portfolio = Portfolio(name=name)
-    
+
     # Adding each asset to the portfolio
     for i, item in enumerate(assets):
         try:
@@ -76,8 +76,11 @@ def load_portfolio_from_json(path: str | Path) -> "Portfolio":
         except (TypeError, ValueError) as e:
             raise ValueError(f"Asset #{i}: invalid value - {e}")
         
-        coingecko_id = item.get("coingecko_id")
-        portfolio.add_asset(Asset(symbol=symbol, amount=amount, price=None, coingecko_id=coingecko_id))
+        crypto_id = item.get("crypto_id")
+        portfolio.add_asset(Asset(symbol=symbol, 
+        amount=amount, 
+        price=None, 
+        crypto_id=crypto_id))
     
     return portfolio
 
@@ -113,7 +116,7 @@ def validate_portfolio_data(data: dict) -> list[str]:
             errors.append(f"Asset #{i}: must be a JSON object")
             continue
 
-        for field in ["symbol", "amount", "coingecko_id"]:
+        for field in ["symbol", "amount", "crypto_id"]:
             if field not in asset:
                 errors.append(f"Asset #{i}: missing field {field}")
 
