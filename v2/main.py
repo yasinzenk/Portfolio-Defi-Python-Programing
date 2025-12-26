@@ -1,16 +1,19 @@
 """
-CLI entry point for the DeFi portfolio risk analyzer (V1).
+CLI entry point for the DeFi portfolio risk analyzer (V2).
 
 Usage:
-    python main.py --portfolio <path_to_portfolio.json> [--days DAYS] [--rf RF] [--confidence CONFIDENCE]
+    python main.py --portfolio <path_to_portfolio.json> [--days DAYS] [--rf RF] [--confidence CONFIDENCE] [--config CONFIG]
 
 Example:
     python main.py --portfolio data/sample_portfolio.json --days 30
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import time
+from typing import Dict, List
 
 import pandas as pd
 
@@ -25,61 +28,87 @@ from risk_analyzer import (
     correlation_matrix,
     portfolio_volatility,
 )
+from config import load_config
+
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
     """Parse arguments, fetch market data, compute risk metrics."""
-    # Initialize logging (console + file)
-    logger = setup_logging(log_level="INFO")
-    logger.info("=" * 50)
-    logger.info("DeFi Portfolio Risk Analyzer V1 - Starting")
-    logger.info("=" * 50)
-
     # ------------------------------------------------------------------
     # Argument parsing
     # ------------------------------------------------------------------
     parser = argparse.ArgumentParser(
-        description="V1 - DeFi Portfolio Risk Analyzer",
-        epilog="Example: python main.py --portfolio data/sample_portfolio.json",
+        description="V2 - DeFi Portfolio Risk Analyzer",
+        epilog="Example: python main.py --portfolio data/sample_portfolio.json --days 30",
     )
     parser.add_argument(
         "--portfolio",
-        required=True,
-        help="Path to the portfolio JSON file",
+        help="Path to the portfolio JSON file (overrides config.data.default_portfolio_path)",
     )
     parser.add_argument(
         "--days",
         type=int,
-        default=30,
-        help="Historical window in days",
+        help="Historical window in days (overrides config.risk.days)",
     )
     parser.add_argument(
         "--rf",
         type=float,
-        default=0.02,
-        help="Annual risk-free rate, e.g. 0.02 for 2%% (default: 0.02)",
+        help="Annual risk-free rate, e.g. 0.02 for 2%% (overrides config.risk.risk_free_rate)",
     )
     parser.add_argument(
         "--confidence",
         type=float,
-        default=0.95,
-        help="VaR confidence level, e.g. 0.95 for 95%% (default: 0.95)",
+        help="VaR confidence level, e.g. 0.95 for 95%% (overrides config.risk.confidence)",
+    )
+    parser.add_argument(
+        "--config",
+        default="config.yml",
+        help="Path to the YAML configuration file (default: config.yml)",
     )
 
     args = parser.parse_args()
+
+    # ------------------------------------------------------------------
+    # Load configuration
+    # ------------------------------------------------------------------
+    cfg = load_config(args.config)
+
+    # Initialize logging (console + file) using config
+    logger_obj = setup_logging(log_level="INFO", log_file=cfg.app.log_file)
+    # Use module-level logger variable
+    global logger
+    logger = logger_obj
+
+    logger.info("=" * 50)
+    logger.info(cfg.app.name)
+    logger.info("=" * 50)
+
     logger.debug(
-        "Arguments: portfolio=%s, days=%d, rf=%.4f, confidence=%.3f",
+        "Arguments: portfolio=%s, days=%s, rf=%s, confidence=%s, config=%s",
         args.portfolio,
         args.days,
         args.rf,
         args.confidence,
+        args.config,
     )
+
+    # Resolve effective parameters (CLI overrides YAML)
+    portfolio_path: str = args.portfolio or cfg.data.default_portfolio_path
+    days: int = args.days if args.days is not None else cfg.risk.days
+    rf: float = args.rf if args.rf is not None else cfg.risk.risk_free_rate
+    confidence: float = (
+        args.confidence if args.confidence is not None else cfg.risk.confidence
+    )
+
+    logger.info("Using portfolio file: %s", portfolio_path)
+    logger.info("Risk parameters: days=%d, rf=%.4f, confidence=%.3f", days, rf, confidence)
 
     # ------------------------------------------------------------------
     # Load portfolio
     # ------------------------------------------------------------------
     try:
-        portfolio = load_portfolio_from_json(args.portfolio)
+        portfolio = load_portfolio_from_json(portfolio_path)
     except (FileNotFoundError, ValueError, KeyError) as exc:
         logger.error("Failed to load portfolio: %s", exc)
         raise
@@ -90,7 +119,7 @@ def main() -> None:
     # Fetch current prices
     # ------------------------------------------------------------------
     logger.info("Fetching current prices...")
-    updated_assets = []
+    updated_assets: List[type(portfolio.assets[0])] = []
     for asset in portfolio.assets:
         crypto_id = asset.crypto_id
         if not crypto_id:
@@ -114,7 +143,6 @@ def main() -> None:
             logger.error("Failed to fetch price for %s: %s", asset.symbol, exc)
             raise
 
-        # Simple rate limiting to avoid hitting the API too aggressively
         time.sleep(0.5)
 
     portfolio.assets = updated_assets
@@ -123,8 +151,8 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Fetch historical prices
     # ------------------------------------------------------------------
-    logger.info("Fetching %d days of historical data...", args.days)
-    price_series: dict[str, pd.Series] = {}
+    logger.info("Fetching %d days of historical data...", days)
+    price_series: Dict[str, pd.Series] = {}
 
     for asset in portfolio.assets:
         crypto_id = asset.crypto_id
@@ -135,7 +163,7 @@ def main() -> None:
         try:
             df_hist = api_client.get_historical_daily(
                 symbol=crypto_id,
-                days=args.days,
+                days=days,
             )
             price_series[asset.symbol] = df_hist["price"]
         except Exception as exc:  # noqa: BLE001
@@ -159,8 +187,8 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Portfolio-level quantities
     # ------------------------------------------------------------------
-    total_value = portfolio.total_value()
-    weights = portfolio.weights()
+    total_value: float = portfolio.total_value()
+    weights: Dict[str, float] = portfolio.weights()
 
     logger.debug("Total portfolio value: %.4f", total_value)
     logger.debug("Computed weights for %d assets", len(weights))
@@ -202,8 +230,8 @@ def main() -> None:
     for symbol in returns_df.columns:
         r = returns_df[symbol]
         vol = annualized_volatility(r)
-        sharpe = sharpe_ratio(r, risk_free_rate=args.rf)
-        var = historical_var(r, confidence=args.confidence)
+        sharpe = sharpe_ratio(r, risk_free_rate=rf)
+        var = historical_var(r, confidence=confidence)
 
         rows.append(
             {
@@ -256,22 +284,21 @@ def main() -> None:
     corr = correlation_matrix(returns_df).round(3)
     assets = list(corr.columns)
 
-    # Header row 
     corr_header = "asset    " + " ".join(f"{a:>8}" for a in assets)
     logger.info("  %s", corr_header)
     logger.info("  %s", "-" * len(corr_header))
 
-    # Each row: asset name + correlation values
     for idx, row in corr.iterrows():
         row_vals = " ".join(f"{val:8.3f}" for val in row.values)
         logger.info("  %-8s %s", idx, row_vals)
 
     logger.info("")
     logger.info("=" * 50)
-    logger.info("DeFi Portfolio Risk Analyzer V1 - Complete")
+    logger.info("DeFi Portfolio Risk Analyzer V2 - Complete")
     logger.info("=" * 50)
-    logger.info("Results saved to: portfolio_analyzer.log")
+    logger.info("Results saved to: %s", cfg.app.log_file)
 
 
 if __name__ == "__main__":
     main()
+
