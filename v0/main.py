@@ -16,12 +16,32 @@ from __future__ import annotations
 
 import argparse
 import logging
+from pathlib import Path
 from typing import Dict
 
 from logger_config import setup_logging
 from data_loader import load_portfolio_from_json
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_portfolio_path(path_str: str) -> Path:
+    """
+    Resolve a portfolio path relative to the version directory when possible.
+
+    This makes root-level execution work with relative paths like
+    ``data/sample_portfolio.json``.
+    """
+    path = Path(path_str)
+    if path.is_absolute():
+        return path
+
+    base_dir = Path(__file__).resolve().parent
+    candidate = base_dir / path
+    if candidate.exists():
+        return candidate
+
+    return path
 
 
 def main() -> None:
@@ -69,7 +89,8 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Load portfolio
     # ------------------------------------------------------------------
-    portfolio = load_portfolio_from_json(args.portfolio)
+    portfolio_path = resolve_portfolio_path(args.portfolio)
+    portfolio = load_portfolio_from_json(portfolio_path)
     logger.info(
         "Loaded portfolio '%s' with %d assets",
         portfolio.name,
