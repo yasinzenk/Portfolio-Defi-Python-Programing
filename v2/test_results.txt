@@ -1,0 +1,38 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- /Users/yass/Documents/Portfolio-Defi-Python-Programing/.venv/bin/python3.14
+cachedir: .pytest_cache
+rootdir: /Users/yass/Documents/Portfolio-Defi-Python-Programing/v2
+collecting ... collected 30 items
+
+tests/test_config.py::test_load_config_uses_defaults_when_file_missing PASSED [  3%]
+tests/test_config.py::test_load_config_overrides_defaults PASSED         [  6%]
+tests/test_config.py::test_load_config_invalid_yaml_raises_value_error PASSED [ 10%]
+tests/test_data_loader.py::TestLoadPortfolioFromJson::test_load_valid_portfolio PASSED [ 13%]
+tests/test_data_loader.py::TestLoadPortfolioFromJson::test_file_not_found PASSED [ 16%]
+tests/test_data_loader.py::TestLoadPortfolioFromJson::test_invalid_extension PASSED [ 20%]
+tests/test_data_loader.py::TestValidatePortfolioData::test_valid_data_no_critical_errors PASSED [ 23%]
+tests/test_data_loader.py::TestValidatePortfolioData::test_missing_assets PASSED [ 26%]
+tests/test_data_loader.py::TestValidatePortfolioData::test_empty_assets PASSED [ 30%]
+tests/test_portfolio_core.py::TestAsset::test_market_value_calculation PASSED [ 33%]
+tests/test_portfolio_core.py::TestAsset::test_market_value_zero_amount PASSED [ 36%]
+tests/test_portfolio_core.py::TestAsset::test_market_value_missing_price PASSED [ 40%]
+tests/test_portfolio_core.py::TestAsset::test_asset_is_immutable PASSED  [ 43%]
+tests/test_portfolio_core.py::TestPortfolio::test_empty_portfolio_total_value PASSED [ 46%]
+tests/test_portfolio_core.py::TestPortfolio::test_single_asset_total_value PASSED [ 50%]
+tests/test_portfolio_core.py::TestPortfolio::test_multiple_assets_total_value PASSED [ 53%]
+tests/test_portfolio_core.py::TestPortfolio::test_weights_single_asset PASSED [ 56%]
+tests/test_portfolio_core.py::TestPortfolio::test_weights_equal_assets PASSED [ 60%]
+tests/test_risk_analyzer.py::TestPricesToReturns::test_simple_returns PASSED [ 63%]
+tests/test_risk_analyzer.py::TestPricesToReturns::test_multiple_columns PASSED [ 66%]
+tests/test_risk_analyzer.py::TestAnnualizedVolatility::test_constant_returns_zero_volatility PASSED [ 70%]
+tests/test_risk_analyzer.py::TestAnnualizedVolatility::test_volatility_is_positive PASSED [ 73%]
+tests/test_risk_analyzer.py::TestAnnualizedVolatility::test_insufficient_data_returns_nan PASSED [ 76%]
+tests/test_risk_analyzer.py::TestSharpeRatio::test_positive_sharpe_for_good_returns PASSED [ 80%]
+tests/test_risk_analyzer.py::TestSharpeRatio::test_insufficient_data_returns_nan PASSED [ 83%]
+tests/test_risk_analyzer.py::TestHistoricalVar::test_var_is_negative_for_losses PASSED [ 86%]
+tests/test_risk_analyzer.py::TestHistoricalVar::test_empty_returns_nan PASSED [ 90%]
+tests/test_risk_analyzer.py::TestCorrelationMatrix::test_diagonal_is_one PASSED [ 93%]
+tests/test_risk_analyzer.py::TestCorrelationMatrix::test_correlation_is_symmetric PASSED [ 96%]
+tests/test_risk_analyzer.py::TestPortfolioVolatility::test_portfolio_vol_is_positive PASSED [100%]
+
+============================== 30 passed in 0.15s ==============================

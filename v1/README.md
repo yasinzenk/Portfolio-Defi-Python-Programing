@@ -14,6 +14,12 @@ pip install -r requirements.txt
 python main.py --portfolio data/sample_portfolio.json --days 30
 ```
 
+From the project root:
+
+```bash
+python v1/main.py --portfolio data/sample_portfolio.json --days 30
+```
+
 ### Options
 
 | Option | Default | Description |
@@ -22,8 +28,6 @@ python main.py --portfolio data/sample_portfolio.json --days 30
 | `--days` | 30 | Historical data window in days |
 | `--rf` | 0.02 | Annual risk-free rate (2%) |
 | `--confidence` | 0.95 | VaR confidence level (95%) |
-| `--plots` | False | Generate PNG visualizations (risk bars + correlation heatmap) |
-| `--outdir` | outputs | Directory to save visualization files |
 
 ## Portfolio JSON Format
 
@@ -79,16 +83,14 @@ v1/
 | Correlation | Pairwise correlation between assets |
 | Portfolio Vol | Overall portfolio volatility with diversification |
 
-## Visualizations (Optional)
-
-When `--plots` is enabled, the CLI writes two PNG files:
-
-- `risk_bars.png`: annualized volatility + Sharpe ratio per asset
-- `correlation_heatmap.png`: asset correlation matrix
-
 ## Running Tests
 
 ```bash
-pip install pytest
 pytest tests/ -v
+```
+
+From the project root:
+
+```bash
+pytest v1/tests/ -v
 ```

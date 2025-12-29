@@ -2,7 +2,8 @@
 CLI entry point for the DeFi portfolio risk analyzer (V1).
 
 Usage:
-    python main.py --portfolio <path_to_portfolio.json> [--days DAYS] [--rf RF] [--confidence CONFIDENCE]
+    python main.py --portfolio <path_to_portfolio.json> [--days DAYS]
+    [--rf RF] [--confidence CONFIDENCE]
 
 Example:
     python main.py --portfolio data/sample_portfolio.json --days 30
@@ -26,7 +27,25 @@ from risk_analyzer import (
     correlation_matrix,
     portfolio_volatility,
 )
-from visualizer import plot_correlation_heatmap, plot_risk_bars
+
+
+def resolve_portfolio_path(path_str: str) -> Path:
+    """
+    Resolve a portfolio path relative to the version directory when possible.
+
+    This makes root-level execution work with relative paths like
+    ``data/sample_portfolio.json``.
+    """
+    path = Path(path_str)
+    if path.is_absolute():
+        return path
+
+    base_dir = Path(__file__).resolve().parent
+    candidate = base_dir / path
+    if candidate.exists():
+        return candidate
+
+    return path
 
 
 def main() -> None:
@@ -67,16 +86,6 @@ def main() -> None:
         default=0.95,
         help="VaR confidence level, e.g. 0.95 for 95%% (default: 0.95)",
     )
-    parser.add_argument(
-        "--plots",
-        action="store_true",
-        help="Generate simple PNG visualizations (risk bars and correlation heatmap)",
-    )
-    parser.add_argument(
-        "--outdir",
-        default="outputs",
-        help="Directory to save visualization files (default: outputs)",
-    )
 
     args = parser.parse_args()
     logger.debug(
@@ -91,7 +100,8 @@ def main() -> None:
     # Load portfolio
     # ------------------------------------------------------------------
     try:
-        portfolio = load_portfolio_from_json(args.portfolio)
+        portfolio_path = resolve_portfolio_path(args.portfolio)
+        portfolio = load_portfolio_from_json(portfolio_path)
     except (FileNotFoundError, ValueError, KeyError) as exc:
         logger.error("Failed to load portfolio: %s", exc)
         raise
@@ -279,14 +289,6 @@ def main() -> None:
         logger.info("  %-8s %s", idx, row_vals)
 
     logger.info("")
-    if args.plots:
-        output_dir = Path(args.outdir)
-        bars_path = plot_risk_bars(metrics_df, output_dir / "risk_bars.png")
-        heatmap_path = plot_correlation_heatmap(
-            corr, output_dir / "correlation_heatmap.png"
-        )
-        logger.info("Plots saved to: %s", output_dir)
-        logger.debug("Plot files: %s, %s", bars_path, heatmap_path)
 
     logger.info("=" * 50)
     logger.info("DeFi Portfolio Risk Analyzer V1 - Complete")

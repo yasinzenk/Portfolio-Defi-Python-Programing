@@ -12,6 +12,11 @@ __pycache__/
 # Logs
 *.log
 
+# Generated artifacts (created by CLI runs)
+cache/
+outputs/
+figures/
+
 # OS / editor
 .DS_Store
 .vscode/
