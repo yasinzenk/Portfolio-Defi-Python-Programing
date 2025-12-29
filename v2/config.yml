@@ -1,0 +1,22 @@
+app:
+  name: "DeFi Portfolio Risk Analyzer V2"
+  log_file: "portfolio_analyzer_v2.log"
+
+data:
+  default_portfolio_path: "data/sample_portfolio.json"
+  cache_dir: "cache"
+  cache_ttl_seconds: 3600
+
+risk:
+  days: 30
+  risk_free_rate: 0.02
+  confidence: 0.95
+
+optimization:
+  target_return: 0.10
+  max_weight_per_asset: 0.30
+  short_selling_allowed: false
+
+visualization:
+  theme: "plotly_dark"
+  output_dir: "figures"

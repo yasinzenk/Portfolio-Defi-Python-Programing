@@ -12,6 +12,12 @@ No external dependencies required. Uses Python 3.10+ standard library only.
 python main.py --portfolio data/sample_portfolio.json
 ```
 
+From the project root:
+
+```bash
+python v0/main.py --portfolio data/sample_portfolio.json
+```
+
 ## Portfolio JSON Format
 
 ```json

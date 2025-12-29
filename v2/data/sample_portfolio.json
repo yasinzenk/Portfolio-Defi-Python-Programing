@@ -1,0 +1,40 @@
+{
+    "name": "defi_portfolio",
+    "assets": [
+        {
+            "symbol": "ETH",
+            "crypto_id": "ETH",
+            "amount": 1.5
+        },
+        {
+            "symbol": "BTC",
+            "crypto_id": "BTC",
+            "amount": 0.05
+        },
+        {
+            "symbol": "AAVE",
+            "crypto_id": "AAVE",
+            "amount": 10
+        },
+        {
+            "symbol": "UNI",
+            "crypto_id": "UNI",
+            "amount": 50
+        },
+        {
+            "symbol": "LINK",
+            "crypto_id": "LINK",
+            "amount": 25
+        },
+        {
+            "symbol": "MKR",
+            "crypto_id": "MKR",
+            "amount": 0.5
+        },
+        {
+            "symbol": "CRV",
+            "crypto_id": "CRV",
+            "amount": 100
+        }
+    ]
+}
